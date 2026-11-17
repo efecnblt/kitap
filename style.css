@@ -365,6 +365,20 @@ button { font: inherit; color: inherit; cursor: pointer; border: 0; background: 
 }
 .toast.show { transform: translate(-50%, 0); visibility: visible; }
 
+/* Giriş karşılama ekranı */
+.welcome {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 40%, #3a2566, #14111f 70%);
+  animation: welcomeOut .7s ease 2.3s forwards; padding: 16px;
+}
+.welcome-inner { text-align: center; }
+.welcome-wave { font-size: 64px; display: inline-block; transform-origin: 70% 70%; animation: pop .5s both, wave 1.4s ease-in-out .4s 1; }
+@keyframes wave { 15%, 45% { transform: rotate(18deg); } 30%, 60% { transform: rotate(-10deg); } 75% { transform: none; } }
+.welcome h2 { font-family: "Fraunces", serif; font-size: clamp(36px, 11vw, 60px); margin: 12px 0 6px; animation: rise .7s .2s both; }
+.welcome h2 span { background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.welcome p { color: var(--muted); margin: 0; font-size: 16px; animation: rise .7s .5s both; }
+@keyframes welcomeOut { to { opacity: 0; visibility: hidden; transform: scale(1.06); } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

@@ -4,7 +4,7 @@ window.CURATED_BOOKS = [
   // ---------- POLİSİYE ----------
   { g: "polisiye", t: "Doğu Ekspresinde Cinayet", a: "Agatha Christie", isbn: "9780062693662",
     s: "Kara saplanan lüks bir trende bir yolcu bıçaklanmış bulunur. Hercule Poirot, herkesin bir sırrı olduğu vagonda katili trenden inmeden bulmak zorundadır." },
-  { g: "polisiye", t: "On Küçük Zenci (Ve Sonra Hiç Kimse Kalmadı)", a: "Agatha Christie", isbn: "9780062073488",
+  { g: "polisiye", t: "Ve Sonra Hiç Kimse Kalmadı", a: "Agatha Christie", isbn: "9780062073488",
     s: "Issız bir adaya davet edilen on yabancı, geçmişteki suçlarıyla yüzleşir. Birer birer ölmeye başladıklarında katilin aralarında olduğunu anlarlar." },
   { g: "polisiye", t: "Roger Ackroyd Cinayeti", a: "Agatha Christie", isbn: "9780062073563",
     s: "Sakin bir köyde zengin bir adam öldürülür. Emekliye ayrılmış Poirot devreye girer ve finaliyle polisiye tarihini değiştiren bir çözüme ulaşır." },
