@@ -7,7 +7,16 @@
     drama: { label: "Drama", emoji: "🎭", subjects: ["domestic_fiction", "psychological_fiction", "family_saga"] },
   };
 
-const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6.5 3.5h11v17l-5.5-3.6-5.5 3.6z"/></svg>`;
+  const TOPICS = {
+    turk: "Türk edebiyatı", klasik: "Klasik", dedektif: "Dedektif", "seri-katil": "Seri katil",
+    psikolojik: "Psikolojik", gerilim: "Gerilim", kapali: "Kapalı mekân gizemi", iskandinav: "İskandinav",
+    mahkeme: "Hukuk & mahkeme", casus: "Casusluk", gercek: "Gerçek olay", tarihi: "Tarihi",
+    ilk: "İlk aşk", ayrilik: "Ayrılık", yasak: "Yasak aşk", imkansiz: "İmkânsız aşk", ikinci: "İkinci şans",
+    komedi: "Eğlenceli", huzun: "Hüzünlü", genc: "Gençlik", aile: "Aile", savas: "Savaş", yas: "Kayıp & yas",
+    varolus: "Varoluş & anlam", toplum: "Toplumsal", buyume: "Büyüme", goc: "Göç", kadin: "Kadın hikâyeleri",
+    dostluk: "Dostluk", hayatta: "Hayatta kalma",
+  };
+  const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6.5 3.5h11v17l-5.5-3.6-5.5 3.6z"/></svg>`;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -17,21 +26,27 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
   };
 
   // ---- Durum ----
-  let books = (window.CURATED_BOOKS || []).map((b) => ({
-    id: "c-" + b.isbn,
-    genre: b.g,
-    title: b.t,
-    author: b.a,
-    summary: b.s,
-    cover: `https://covers.openlibrary.org/b/isbn/${b.isbn}-M.jpg?default=false`,
-    link: `https://openlibrary.org/isbn/${b.isbn}`,
+  const slug = (s) => s.toLocaleLowerCase("tr").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const DATA = window.BOOK_DATA || {};
+  let books = Object.keys(DATA).flatMap((g) => DATA[g].map(([t, a, o, isbn, k, s]) => ({
+    id: "c-" + (isbn || slug(t + "-" + a)),
+    genre: g,
+    title: t,
+    author: a,
+    orig: o || t,
+    summary: s,
+    tags: k.split(",").filter(Boolean),
+    cover: isbn ? `https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg?default=false` : null,
+    needsLookup: !isbn,
+    link: `https://www.google.com/search?q=${encodeURIComponent(t + " " + a + " kitap")}`,
     live: false,
-  }));
+  })));
   // Daha önce internetten keşfedilen kitapları geri yükle
   const savedLive = store.get("liveBooks", []);
   books = books.concat(savedLive.filter((b) => !books.some((x) => x.id === b.id)));
 
   let filter = "all";
+  const topics = new Set();
   let query = "";
   let showFavs = false;
   let favs = new Set(store.get("favs", []));
@@ -59,12 +74,70 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
     el.appendChild(d);
   }
 
+  // ---- Kapak bulma: ISBN'i olmayan kitaplar için Open Library'de isimle ara ----
+  const coverCache = store.get("coverCache2", {});
+  const lookupQueue = [];
+  let lookupsRunning = 0;
+  function lookupCover(b) {
+    if (b.id in coverCache) return Promise.resolve(coverCache[b.id]);
+    if (b._lookup) return b._lookup;
+    b._lookup = new Promise((resolve) => { lookupQueue.push({ b, resolve }); pumpLookups(); });
+    return b._lookup;
+  }
+  function pumpLookups() {
+    while (lookupsRunning < 4 && lookupQueue.length) {
+      const { b, resolve } = lookupQueue.shift();
+      lookupsRunning++;
+      (async () => {
+        let id = 0;
+        let failed = false;
+        const surname = b.author.split(" ").pop();
+        const tries = [
+          `title=${encodeURIComponent(b.orig)}&author=${encodeURIComponent(surname)}`,
+          b.orig !== b.title ? `title=${encodeURIComponent(b.title)}&author=${encodeURIComponent(surname)}` : null,
+        ].filter(Boolean);
+        for (const q of tries) {
+          try {
+            const r = await fetchJSON(`https://openlibrary.org/search.json?${q}&limit=5&fields=cover_i`, 10000);
+            const hit = (r.docs || []).find((d) => d.cover_i);
+            if (hit) { id = hit.cover_i; break; }
+          } catch { failed = true; }
+        }
+        // Ağ hatasında önbelleğe yazma, sonra tekrar denensin
+        if (!failed || id) { coverCache[b.id] = id; store.set("coverCache2", coverCache); }
+        resolve(id);
+      })().finally(() => { lookupsRunning--; pumpLookups(); });
+    }
+  }
+  const io = "IntersectionObserver" in window ? new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (!en.isIntersecting) return;
+      io.unobserve(en.target);
+      if (en.target._start) en.target._start();
+    });
+  }, { rootMargin: "400px 0px" }) : null;
+
   function hydrateCovers(root, getBook) {
     $$(".cover", root).forEach((el) => {
       const img = el.querySelector("img");
       if (!img) return;
       const b = getBook(el);
+      if (b.needsLookup && !b.cover) {
+        const start = () => lookupCover(b).then((cid) => {
+          if (!cid) return fakeCover(el, b);
+          b.cover = `https://covers.openlibrary.org/b/id/${cid}-M.jpg`;
+          img.dataset.src = b.cover;
+          loadImg(el, img, b);
+        });
+        if (io) { el._start = start; io.observe(el); } else start();
+        return;
+      }
       if (!b.cover) return fakeCover(el, b);
+      loadImg(el, img, b);
+    });
+  }
+  function loadImg(el, img, b) {
+    {
       img.onload = () => {
         // Open Library bazen 1x1 boş görsel döndürür
         if (img.naturalWidth < 10) return fakeCover(el, b);
@@ -73,7 +146,7 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
       };
       img.onerror = () => fakeCover(el, b);
       img.src = img.dataset.src;
-    });
+    }
   }
 
   // ---- Liste ----
@@ -81,15 +154,38 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
     const q = norm(query.trim());
     return books.filter((b) =>
       (filter === "all" || b.genre === filter) &&
+      matchTopics(b) &&
       (!showFavs || favs.has(b.id)) &&
       (!q || norm(b.title + " " + b.author).includes(q))
     );
   }
 
+  const matchTopics = (b) => [...topics].every((t) => b.tags && b.tags.includes(t));
+
+  function renderTopics() {
+    const base = books.filter((b) => (filter === "all" || b.genre === filter) && (!showFavs || favs.has(b.id)));
+    const counts = {};
+    base.forEach((b) => (b.tags || []).forEach((t) => (counts[t] = (counts[t] || 0) + 1)));
+    const keys = Object.keys(TOPICS).filter((t) => counts[t] || topics.has(t));
+    const rank = (t) => (topics.has(t) ? 0 : t === "turk" ? 1 : 2);
+    keys.sort((a, b) => rank(a) - rank(b) || (counts[b] || 0) - (counts[a] || 0));
+    const pool = base.filter(matchTopics);
+    const el = $("#topics");
+    el.innerHTML = keys.map((t) => {
+      const on = topics.has(t);
+      const n = on ? pool.length : pool.filter((b) => b.tags && b.tags.includes(t)).length;
+      if (!on && !n) return "";
+      return `<button class="topic ${on ? "active" : ""}" data-t="${t}">${TOPICS[t]}<span>${n}</span></button>`;
+    }).join("");
+    el.scrollLeft = 0;
+    $("#clearTopics").hidden = !topics.size;
+  }
+
   function render() {
+    renderTopics();
     const list = visibleBooks();
     const grid = $("#grid");
-    const gLabel = filter === "all" ? "Tüm türler" : GENRES[filter].label;
+    const gLabel = (filter === "all" ? "Tüm türler" : GENRES[filter].label) + [...topics].map((t) => " · " + TOPICS[t]).join("");
     $("#listTitle").textContent = showFavs
       ? `Okuma listem · ${list.length} kitap`
       : `${gLabel} · ${list.length} kitap`;
@@ -97,7 +193,7 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
     if (!list.length) {
       grid.innerHTML = showFavs
         ? `<div class="empty"><b>Listen henüz boş</b>Kapakların köşesindeki işarete dokunarak kitap ekleyebilirsin.</div>`
-        : `<div class="empty"><b>Sonuç yok</b>Bu aramayla eşleşen kitap bulunamadı.</div>`;
+        : `<div class="empty"><b>Sonuç yok</b>Bu filtrelerle eşleşen kitap bulunamadı. Bir konuyu kaldırmayı dene.</div>`;
       return;
     }
 
@@ -293,6 +389,7 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 
   function openDice() {
     diceGenre = filter;
+    $("#diceTopics").textContent = topics.size ? "Konular: " + [...topics].map((t) => TOPICS[t]).join(", ") : "";
     $$("#diceGenres .chip").forEach((c) => c.classList.toggle("active", c.dataset.g === diceGenre));
     $("#diceModal").classList.add("open");
     $("#diceModal").classList.remove("revealed");
@@ -309,7 +406,11 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 
   function roll() {
     if (rolling) return;
-    const pool = books.filter((b) => diceGenre === "all" || b.genre === diceGenre);
+    let pool = books.filter((b) => (diceGenre === "all" || b.genre === diceGenre) && matchTopics(b));
+    if (!pool.length) {
+      pool = books.filter((b) => diceGenre === "all" || b.genre === diceGenre);
+      if (topics.size) toast("Seçili konularda kitap yok, türün tamamından atıldı");
+    }
     if (!pool.length) return toast("Bu türde kitap yok");
     rolling = true;
     $("#rollAgain").disabled = true;
@@ -398,6 +499,15 @@ const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
   }
 
   // ---- Olaylar ----
+  $("#topics").addEventListener("click", (e) => {
+    const c = e.target.closest(".topic");
+    if (!c || c.disabled) return;
+    const t = c.dataset.t;
+    topics.has(t) ? topics.delete(t) : topics.add(t);
+    render();
+  });
+  $("#clearTopics").addEventListener("click", () => { topics.clear(); render(); });
+
   $("#chips").addEventListener("click", (e) => {
     const c = e.target.closest(".chip");
     if (!c) return;

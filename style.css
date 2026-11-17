@@ -178,6 +178,33 @@ em { font-style: italic; }
 .search-wrap input { flex: 1; border: 0; outline: 0; background: none; color: var(--ink); font: inherit; font-size: 16px; min-width: 0; }
 .search-wrap input::placeholder { color: var(--muted); }
 
+.topics-head {
+  max-width: 1100px; margin: 0 auto; padding: 18px 16px 0;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.topics-head button { font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.topics {
+  display: flex; gap: 6px; padding: 10px 16px 2px; overflow-x: auto; scrollbar-width: none;
+  max-width: 1100px; margin: 0 auto; flex-wrap: nowrap;
+  mask-image: linear-gradient(90deg, #000 88%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
+}
+.topics::-webkit-scrollbar { display: none; }
+@media (min-width: 900px) { .topics { flex-wrap: wrap; mask-image: none; -webkit-mask-image: none; } }
+.topic {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+  border-radius: 8px; font-size: 13.5px; font-weight: 500; color: var(--ink-2);
+  background: var(--surface-2); border: 1px solid transparent;
+  transition: background .2s, color .2s, opacity .2s, transform .2s var(--ease);
+}
+.topic span { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.topic:active { transform: scale(.95); }
+.topic.active { background: var(--ink); color: var(--on-ink); }
+.topic.active span { color: var(--on-ink); opacity: .7; }
+.topic:disabled { opacity: .35; }
+.dice-topics { margin: 10px 16px 0; font-size: 12.5px; color: var(--muted); text-align: center; min-height: 0; }
+.dice-topics:empty { display: none; }
+
 .list-title {
   max-width: 1100px; margin: 0 auto; padding: 20px 16px 2px;
   font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);

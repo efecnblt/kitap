@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=3" />
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
   <div class="welcome" id="welcome" aria-hidden="true">
@@ -37,7 +37,7 @@
   <section class="hero">
     <p class="hero-kicker">Merhaba Gözde</p>
     <h1>Bugün ne <em>okusan?</em></h1>
-    <p class="hero-sub">Polisiye, aşk ve drama arasından seçilmiş kitaplar. Karar veremiyorsan zarı at.</p>
+    <p class="hero-sub">Polisiye, aşk ve drama arasından seçilmiş 200'ü aşkın kitap. Karar veremiyorsan zarı at.</p>
     <button class="primary-btn" id="rollBtn">
       <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/></svg>
       Zar at
@@ -57,6 +57,12 @@
     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5" stroke-linecap="round"/></svg>
     <input id="search" type="search" placeholder="Kitap ya da yazar ara" autocomplete="off" />
   </div>
+
+  <div class="topics-head">
+    <span>Konu seç</span>
+    <button id="clearTopics" hidden>Temizle</button>
+  </div>
+  <div class="topics" id="topics" aria-label="Konu filtresi"></div>
 
   <p class="list-title" id="listTitle"></p>
   <main class="grid" id="grid" aria-live="polite"></main>
@@ -91,6 +97,7 @@
       <button class="chip" data-g="ask"><span class="dot ask"></span>Aşk</button>
       <button class="chip" data-g="drama"><span class="dot drama"></span>Drama</button>
     </div>
+    <p class="dice-topics" id="diceTopics"></p>
     <div class="dice-stage" id="diceStage">
       <div class="scene">
         <div class="cube" id="cube">
@@ -116,7 +123,9 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="books.js?v=3"></script>
-  <script src="app.js?v=3"></script>
+  <script src="data/polisiye.js?v=4"></script>
+  <script src="data/ask.js?v=4"></script>
+  <script src="data/drama.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
