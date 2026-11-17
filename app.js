@@ -569,6 +569,72 @@
   const top = $(".top");
   addEventListener("scroll", () => top.classList.toggle("scrolled", scrollY > 8), { passive: true });
 
+  // ---- Fotoğraf gönder ----
+  (() => {
+    const file = $("#sendFile"), btn = $("#sendBtn"), status = $("#sendStatus");
+    const preview = $("#sendPreview"), empty = $("#sendEmpty");
+    let blob = null;
+
+    // Fotoğrafı tarayıcıda küçült (en uzun kenar 1800px, JPEG)
+    async function shrink(f) {
+      const url = URL.createObjectURL(f);
+      try {
+        const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+        const scale = Math.min(1, 1800 / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * scale);
+        c.height = Math.round(img.naturalHeight * scale);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        return await new Promise((res) => c.toBlob(res, "image/jpeg", 0.85));
+      } finally { URL.revokeObjectURL(url); }
+    }
+
+    file.addEventListener("change", async () => {
+      const f = file.files && file.files[0];
+      if (!f) return;
+      status.className = "send-status";
+      status.textContent = "Hazırlanıyor…";
+      btn.disabled = true;
+      try {
+        blob = await shrink(f);
+        if (preview.src) URL.revokeObjectURL(preview.src);
+        preview.src = URL.createObjectURL(blob);
+        preview.hidden = false; empty.hidden = true;
+        status.textContent = "";
+        btn.disabled = false;
+      } catch {
+        blob = null;
+        status.textContent = "Bu dosya açılamadı, başka bir fotoğraf dene.";
+      }
+    });
+
+    btn.addEventListener("click", async () => {
+      if (!blob) return;
+      btn.disabled = true;
+      btn.textContent = "Gönderiliyor…";
+      status.className = "send-status";
+      status.textContent = "";
+      try {
+        const r = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "content-type": "image/jpeg", "x-not": encodeURIComponent($("#sendNote").value.trim()) },
+          body: blob,
+        });
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Gönderilemedi");
+        status.className = "send-status ok";
+        status.textContent = "Gönderildi, teşekkürler!";
+        toast("Fotoğraf gönderildi");
+        blob = null; file.value = ""; $("#sendNote").value = "";
+        preview.hidden = true; empty.hidden = false;
+      } catch (e) {
+        status.textContent = (e && e.message && e.message !== "Failed to fetch" ? e.message : "Gönderilemedi") + ". Biraz sonra tekrar dene.";
+        btn.disabled = false;
+      } finally {
+        btn.textContent = "Gönder";
+      }
+    });
+  })();
+
   // ---- Başlat ----
   books = shuffle(books.slice());
   updateFavBadge(false);

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Galeri</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=5" />
+  <style>
+    .g-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+    .g-wrap h1 { font-family: var(--serif); font-weight: 400; font-size: 44px; margin: 0 0 6px; letter-spacing: -.02em; }
+    .g-sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+    .login { max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+    .login input { height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; outline: none; }
+    .login input:focus { border-color: var(--ink); }
+    .err { color: var(--ask); font-size: 14px; min-height: 18px; margin: 0; }
+    .g-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    @media (min-width: 700px) { .g-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    .g-item { position: relative; border-radius: 12px; overflow: hidden; background: var(--surface-2); aspect-ratio: 3 / 4; cursor: pointer; animation: fadeUp .5s var(--ease) both; }
+    .g-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .g-meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 10px 8px; color: #fff; font-size: 12px; line-height: 1.35;
+      background: linear-gradient(transparent, rgba(0,0,0,.7)); }
+    .g-meta b { display: block; font-weight: 500; }
+    .viewer { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.92); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 16px; gap: 14px; }
+    .viewer.open { display: flex; }
+    .viewer img { max-width: 100%; max-height: 72vh; border-radius: 10px; }
+    .viewer p { color: #eee; margin: 0; font-size: 14px; text-align: center; }
+    .viewer .row { display: flex; gap: 10px; }
+    .viewer .btn { flex: none; padding: 0 20px; }
+    .empty-g { color: var(--muted); padding: 40px 0; }
+  </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>Galeri</h1>
+    <p class="g-sub" id="sub">Siteden gönderilen fotoğraflar.</p>
+
+    <form class="login" id="login">
+      <input type="password" id="pw" placeholder="Şifre" autocomplete="current-password" required />
+      <button class="primary-btn" type="submit">Giriş</button>
+      <p class="err" id="err"></p>
+    </form>
+
+    <div class="g-grid" id="grid" hidden></div>
+  </div>
+
+  <div class="viewer" id="viewer">
+    <img id="vImg" alt="" />
+    <p id="vMeta"></p>
+    <div class="row">
+      <a class="btn" id="vDown" download>İndir</a>
+      <button class="btn" id="vDel">Sil</button>
+      <button class="btn primary" id="vClose">Kapat</button>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const $ = (s) => document.querySelector(s);
+      let pw = "";
+      try { pw = sessionStorage.getItem("galeriSifre") || ""; } catch {}
+      let current = null;
+
+      const api = (path, opts = {}) => fetch(path, { ...opts, headers: { ...(opts.headers || {}), "x-galeri-sifre": pw } });
+
+      function info(p) {
+        const name = p.pathname.replace(/^uploads\//, "");
+        const m = name.match(/__(.+?)-[A-Za-z0-9]+\.\w+$/) || name.match(/__(.+?)\.\w+$/);
+        let note = "";
+        if (m) { try { note = decodeURIComponent(m[1]); } catch { note = m[1]; } note = note.replace(/_/g, " "); }
+        const d = new Date(p.uploadedAt);
+        return { note, date: d.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short" }) };
+      }
+
+      async function load() {
+        const r = await api("/api/photos");
+        if (r.status === 401) { pw = ""; try { sessionStorage.removeItem("galeriSifre"); } catch {} ; $("#err").textContent = "Şifre yanlış."; return; }
+        if (!r.ok) { $("#err").textContent = "Fotoğraflar alınamadı."; return; }
+        try { sessionStorage.setItem("galeriSifre", pw); } catch {}
+        const { photos } = await r.json();
+        $("#login").hidden = true;
+        const grid = $("#grid");
+        grid.hidden = false;
+        $("#sub").textContent = photos.length ? `${photos.length} fotoğraf` : "Henüz fotoğraf gönderilmemiş.";
+        grid.innerHTML = "";
+        photos.forEach((p, i) => {
+          const { note, date } = info(p);
+          const el = document.createElement("div");
+          el.className = "g-item";
+          el.style.animationDelay = Math.min(i, 12) * 40 + "ms";
+          el.innerHTML = `<img alt="" /><div class="g-meta"><b></b><span></span></div>`;
+          el.querySelector("b").textContent = note;
+          el.querySelector("span").textContent = date;
+          grid.appendChild(el);
+          api("/api/photos?p=" + encodeURIComponent(p.pathname)).then((r) => r.ok ? r.blob() : null).then((b) => {
+            if (!b) return;
+            const url = URL.createObjectURL(b);
+            el.querySelector("img").src = url;
+            el.onclick = () => openViewer(p, url, note, date);
+          });
+        });
+      }
+
+      function openViewer(p, url, note, date) {
+        current = p;
+        $("#vImg").src = url;
+        $("#vMeta").textContent = (note ? note + " · " : "") + date;
+        $("#vDown").href = url;
+        $("#vDown").download = p.pathname.split("/").pop();
+        $("#viewer").classList.add("open");
+      }
+      $("#vClose").onclick = () => $("#viewer").classList.remove("open");
+      $("#vDel").onclick = async () => {
+        if (!current) return;
+        const b = $("#vDel");
+        if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "Emin misin?"; return; }
+        b.dataset.confirm = ""; b.textContent = "Sil";
+        const r = await api("/api/photos?p=" + encodeURIComponent(current.pathname), { method: "DELETE" });
+        $("#viewer").classList.remove("open");
+        if (r.ok) load();
+      };
+
+      $("#login").addEventListener("submit", (e) => {
+        e.preventDefault();
+        $("#err").textContent = "";
+        pw = $("#pw").value;
+        load();
+      });
+      if (pw) load();
+    })();
+  </script>
+</body>
+</html>

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=4" />
+  <link rel="stylesheet" href="style.css?v=5" />
 </head>
 <body>
   <div class="welcome" id="welcome" aria-hidden="true">
@@ -74,6 +74,26 @@
     <p class="more-note" id="moreNote"></p>
   </div>
 
+  <section class="send" id="send">
+    <div class="send-card">
+      <div class="send-text">
+        <h2>Bir fotoğraf gönder</h2>
+        <p>Bugün ne okuyorsun, nerede okuyorsun? Bir fotoğraf çek, gönder. Fotoğraf sadece sitenin sahibine iletilir.</p>
+      </div>
+      <label class="send-drop" id="sendDrop">
+        <input type="file" id="sendFile" accept="image/*" hidden />
+        <img id="sendPreview" alt="" hidden />
+        <span class="send-empty" id="sendEmpty">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          Fotoğraf seç ya da çek
+        </span>
+      </label>
+      <input class="send-note" id="sendNote" maxlength="140" placeholder="Kısa bir not ekle (isteğe bağlı)" />
+      <button class="primary-btn send-btn" id="sendBtn" disabled>Gönder</button>
+      <p class="send-status" id="sendStatus" role="status"></p>
+    </div>
+  </section>
+
   <footer class="foot">Kitap verileri ve kapaklar <a href="https://openlibrary.org" target="_blank" rel="noopener">Open Library</a>'den.</footer>
 
   <!-- Detay paneli -->
@@ -126,6 +146,6 @@
   <script src="data/polisiye.js?v=4"></script>
   <script src="data/ask.js?v=4"></script>
   <script src="data/drama.js?v=4"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

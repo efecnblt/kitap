@@ -41,6 +41,7 @@ body {
   min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased;
 }
 body.lock { overflow: hidden; }
+[hidden] { display: none !important; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 a { color: inherit; }
 em { font-style: italic; }
@@ -287,6 +288,27 @@ em { font-style: italic; }
 
 .more-wrap { text-align: center; padding: 28px 16px 4px; }
 .more-note { color: var(--muted); font-size: 12.5px; min-height: 16px; margin: 10px 0 0; }
+/* ---------- Fotoğraf gönder ---------- */
+.send { padding: 36px 16px 0; max-width: 560px; margin: 0 auto; }
+.send-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.send-text h2 { font-family: var(--serif); font-weight: 400; font-size: 28px; margin: 0 0 4px; letter-spacing: -.01em; }
+.send-text p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.send-drop {
+  position: relative; display: grid; place-items: center; min-height: 150px; border-radius: 12px; cursor: pointer;
+  border: 1.5px dashed var(--line); background: var(--bg); overflow: hidden; transition: border-color .2s;
+}
+.send-drop:active { border-color: var(--ink); }
+.send-drop img { width: 100%; max-height: 320px; object-fit: cover; display: block; animation: fadeUp .4s var(--ease); }
+.send-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; font-weight: 500; }
+.send-note {
+  height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg);
+  color: var(--ink); font: inherit; font-size: 16px; outline: none;
+}
+.send-note:focus { border-color: var(--ink); }
+.send-btn { width: 100%; }
+.send-status { margin: 0; font-size: 13.5px; color: var(--muted); min-height: 18px; text-align: center; }
+.send-status.ok { color: var(--ink); font-weight: 500; }
+
 .foot { text-align: center; color: var(--muted); font-size: 12px; padding: 22px 16px calc(28px + var(--safe-b)); }
 
 /* ---------- Detay paneli ---------- */
