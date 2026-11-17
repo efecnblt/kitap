@@ -7,6 +7,7 @@
     drama: { label: "Drama", emoji: "🎭", subjects: ["domestic_fiction", "psychological_fiction", "family_saga"] },
   };
 
+const BOOKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6.5 3.5h11v17l-5.5-3.6-5.5 3.6z"/></svg>`;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -90,32 +91,33 @@
     const grid = $("#grid");
     const gLabel = filter === "all" ? "Tüm türler" : GENRES[filter].label;
     $("#listTitle").textContent = showFavs
-      ? `📌 Okuma listem · ${list.length} kitap`
+      ? `Okuma listem · ${list.length} kitap`
       : `${gLabel} · ${list.length} kitap`;
 
     if (!list.length) {
       grid.innerHTML = showFavs
-        ? `<div class="empty"><b>📌</b>Okuma listen boş. Bir kartın köşesindeki 🤍 ile kitap ekleyebilirsin.</div>`
-        : `<div class="empty"><b>🔎</b>Bu aramayla eşleşen kitap yok.</div>`;
+        ? `<div class="empty"><b>Listen henüz boş</b>Kapakların köşesindeki işarete dokunarak kitap ekleyebilirsin.</div>`
+        : `<div class="empty"><b>Sonuç yok</b>Bu aramayla eşleşen kitap bulunamadı.</div>`;
       return;
     }
 
     grid.innerHTML = list.map((b, i) => `
       <article class="card" data-id="${esc(b.id)}" style="--i:${Math.min(i, 14)}" tabindex="0">
-        <span class="tag ${b.genre}">${GENRES[b.genre].emoji} ${GENRES[b.genre].label}</span>
-        <button class="fav-btn ${favs.has(b.id) ? "on" : ""}" data-fav="${esc(b.id)}" aria-label="Okuma listesine ekle">${favs.has(b.id) ? "❤️" : "🤍"}</button>
+        <button class="fav-btn ${favs.has(b.id) ? "on" : ""}" data-fav="${esc(b.id)}" aria-label="Okuma listesine ekle">${BOOKMARK}</button>
         ${coverHTML(b)}
         <div class="info">
+          <span class="genre-label"><span class="dot ${b.genre}"></span>${GENRES[b.genre].label}</span>
           <h3>${esc(b.title)}</h3>
           <span class="author">${esc(b.author)}</span>
           <p class="sum">${esc(b.summary)}</p>
-          ${b.live ? `<span class="live-dot">● internetten</span>` : ""}
+          ${b.live ? `<span class="live-dot">Open Library'den</span>` : ""}
         </div>
       </article>`).join("");
 
     hydrateCovers(grid, (el) => byId(el.closest(".card").dataset.id));
   }
 
+  const favBtnInner = (on) => `${BOOKMARK}${on ? "Listemde" : "Listeme ekle"}`;
   const byId = (id) => books.find((b) => b.id === id);
 
   // ---- Okuma listesi ----
@@ -133,11 +135,10 @@
     // Okuma listesindeki canlı kitapları kalıcı tut
     persistLive();
     updateFavBadge(true);
-    toast(had ? "Listeden çıkarıldı" : "📌 Okuma listene eklendi");
+    toast(had ? "Listeden çıkarıldı" : "Okuma listene eklendi");
     $$(`[data-fav="${CSS.escape(id)}"]`).forEach((btn) => {
       btn.classList.toggle("on", !had);
-      btn.textContent = !had ? "❤️" : "🤍";
-      if (btn.classList.contains("btn")) btn.textContent = !had ? "❤️ Listemde" : "🤍 Listeme ekle";
+      if (btn.classList.contains("btn")) btn.innerHTML = favBtnInner(!had);
     });
     if (showFavs) render();
   }
@@ -148,15 +149,15 @@
       <div class="detail-top">
         ${coverHTML(b)}
         <div>
-          <span class="detail-genre ${b.genre}">${GENRES[b.genre].emoji} ${GENRES[b.genre].label}</span>
+          <span class="genre-label"><span class="dot ${b.genre}"></span>${GENRES[b.genre].label}</span>
           <h2 id="sheetTitle">${esc(b.title)}</h2>
           <div class="author">${esc(b.author)}</div>
         </div>
       </div>
       <p class="detail-sum">${esc(b.summary)}</p>
       <div class="detail-actions">
-        <button class="btn" data-fav="${esc(b.id)}">${favs.has(b.id) ? "❤️ Listemde" : "🤍 Listeme ekle"}</button>
-        <a class="btn primary" href="${esc(b.link)}" target="_blank" rel="noopener">Kitaba göz at ↗</a>
+        <button class="btn ${favs.has(b.id) ? "on" : ""}" data-fav="${esc(b.id)}">${favBtnInner(favs.has(b.id))}</button>
+        <a class="btn primary" href="${esc(b.link)}" target="_blank" rel="noopener">Kitaba göz at</a>
       </div>`;
     hydrateCovers($("#sheetBody"), () => b);
     $("#sheet").classList.add("open");
@@ -273,7 +274,7 @@
         persistLive();
         showFavs = false; $("#favToggle").classList.remove("on");
         render();
-        note.textContent = `✨ ${added.length} yeni kitap eklendi (özetler orijinal dilinde olabilir).`;
+        note.textContent = `${added.length} yeni kitap eklendi. Bu kitapların özetleri orijinal dilinde olabilir.`;
         $("#grid").scrollIntoView({ behavior: "smooth", block: "start" });
       }
     } catch (e) {
@@ -296,7 +297,7 @@
     $("#diceModal").classList.add("open");
     $("#diceModal").classList.remove("revealed");
     $("#diceResult").innerHTML = "";
-    $("#rollLabel").textContent = "Zarı At";
+    $("#rollLabel").textContent = "Zarı at";
     $("#cube").classList.add("idle");
     document.body.classList.add("lock");
     setTimeout(roll, 450);
@@ -343,7 +344,7 @@
       cube.classList.remove("rolling");
       rolling = false;
       $("#rollAgain").disabled = false;
-      $("#rollLabel").textContent = "Tekrar At";
+      $("#rollLabel").textContent = "Tekrar at";
       reveal(pick);
     }, 1650);
   }
@@ -353,19 +354,18 @@
     modal.classList.add("revealed");
     $("#diceResult").innerHTML = `
       <div class="result-card">
-        <div class="kicker">✨ Bugünün kitabı</div>
+        <div class="kicker">Bugünün kitabı</div>
         ${coverHTML(b)}
-        <span class="detail-genre ${b.genre}">${GENRES[b.genre].emoji} ${GENRES[b.genre].label}</span>
+        <span class="genre-label"><span class="dot ${b.genre}"></span>${GENRES[b.genre].label}</span>
         <h3>${esc(b.title)}</h3>
         <div class="author">${esc(b.author)}</div>
         <p>${esc(b.summary)}</p>
         <div class="detail-actions">
-          <button class="btn" data-fav="${esc(b.id)}">${favs.has(b.id) ? "❤️ Listemde" : "🤍 Listeme ekle"}</button>
-          <a class="btn primary" href="${esc(b.link)}" target="_blank" rel="noopener">Göz at ↗</a>
+          <button class="btn ${favs.has(b.id) ? "on" : ""}" data-fav="${esc(b.id)}">${favBtnInner(favs.has(b.id))}</button>
+          <a class="btn primary" href="${esc(b.link)}" target="_blank" rel="noopener">Göz at</a>
         </div>
       </div>`;
     hydrateCovers($("#diceResult"), () => b);
-    confetti();
   }
 
   function confetti() {
@@ -447,6 +447,17 @@
     if ($("#sheet").classList.contains("open")) closeSheet();
     else if ($("#diceModal").classList.contains("open")) closeDice();
   });
+
+  // ---- Karşılama ve kaydırma ----
+  const welcome = $("#welcome");
+  if (welcome) {
+    let seen = null; try { seen = sessionStorage.getItem("welcomed"); } catch {}
+    setTimeout(() => welcome.classList.add("hide"), seen ? 50 : 1900);
+    setTimeout(() => welcome.remove(), seen ? 700 : 2600);
+    try { sessionStorage.setItem("welcomed", "1"); } catch {}
+  }
+  const top = $(".top");
+  addEventListener("scroll", () => top.classList.toggle("scrolled", scrollY > 8), { passive: true });
 
   // ---- Başlat ----
   books = shuffle(books.slice());
