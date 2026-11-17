@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#f5f3ee" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)" />
+  <title>Sohbet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=6" />
+  <style>
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+
+    /* Giriş */
+    .gate { flex: 1; display: grid; place-items: center; padding: 16px; }
+    .gate-box { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; animation: fadeUp .6s var(--ease) both; }
+    .gate h1 { font-family: var(--serif); font-weight: 400; font-size: 46px; margin: 0; letter-spacing: -.02em; line-height: 1; }
+    .gate p { color: var(--muted); margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
+    .field { height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; outline: none; }
+    .field:focus { border-color: var(--ink); }
+    .err { color: var(--ask); font-size: 14px; min-height: 18px; margin: 0; }
+
+    /* Sohbet */
+    .chat { flex: 1; display: none; flex-direction: column; min-height: 0; }
+    .chat.on { display: flex; }
+    .chat-top {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: calc(10px + var(--safe-t)) 16px 10px; border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    }
+    .chat-top b { font-weight: 600; font-size: 16px; letter-spacing: -.01em; display: block; }
+    .chat-top small { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+    .live { width: 7px; height: 7px; border-radius: 50%; background: #3aa76d; box-shadow: 0 0 0 0 rgba(58,167,109,.5); animation: pulse 2s infinite; }
+    .live.off { background: var(--muted); animation: none; }
+    @keyframes pulse { 70% { box-shadow: 0 0 0 7px rgba(58,167,109,0); } 100% { box-shadow: 0 0 0 0 rgba(58,167,109,0); } }
+    .nick-btn { font-size: 13px; color: var(--ink-2); border: 1px solid var(--line); background: var(--surface); height: 34px; padding: 0 12px; border-radius: 999px; }
+
+    .msgs { flex: 1; overflow-y: auto; padding: 16px 14px 8px; display: flex; flex-direction: column; gap: 4px; overscroll-behavior: contain; }
+    .note { align-self: center; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.5; max-width: 300px; margin: 6px 0 14px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); }
+    .row { display: flex; flex-direction: column; align-items: flex-start; max-width: 80%; animation: msgIn .3s var(--ease) both; }
+    .row.me { align-self: flex-end; align-items: flex-end; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+    .who { font-size: 11.5px; color: var(--muted); margin: 8px 6px 3px; }
+    .bubble {
+      padding: 9px 13px; border-radius: 18px; font-size: 15.5px; line-height: 1.4; white-space: pre-wrap; word-break: break-word;
+      background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 6px;
+    }
+    .row.me .bubble { background: var(--ink); color: var(--on-ink); border-color: var(--ink); border-bottom-left-radius: 18px; border-bottom-right-radius: 6px; }
+    .row.pending .bubble { opacity: .55; }
+    .meta { font-size: 10.5px; color: var(--muted); margin: 3px 6px 0; font-variant-numeric: tabular-nums; }
+
+    .typing { height: 22px; padding: 0 18px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .dots { display: inline-flex; gap: 3px; }
+    .dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); animation: dot 1.2s infinite; }
+    .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+    @keyframes dot { 30% { transform: translateY(-3px); opacity: 1; } 0%, 60%, 100% { opacity: .4; } }
+
+    .composer { display: flex; align-items: flex-end; gap: 8px; padding: 8px 12px calc(10px + var(--safe-b)); border-top: 1px solid var(--line); background: var(--bg); }
+    .composer textarea {
+      flex: 1; resize: none; max-height: 120px; min-height: 44px; padding: 11px 14px; border-radius: 22px;
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; line-height: 1.35; outline: none;
+    }
+    .composer textarea:focus { border-color: var(--ink); }
+    .send-arrow { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--on-ink); display: grid; place-items: center; flex: none; transition: transform .2s var(--ease), opacity .2s; }
+    .send-arrow:disabled { opacity: .35; }
+    .send-arrow:active { transform: scale(.9); }
+  </style>
+</head>
+<body>
+  <section class="gate" id="gate">
+    <form class="gate-box" id="login">
+      <h1>Sohbet</h1>
+      <p>Şifreyle girilen, anonim bir sohbet. Mesajlar gönderildikten 24 saat sonra kendiliğinden silinir.</p>
+      <input class="field" type="password" id="pw" placeholder="Şifre" autocomplete="current-password" required />
+      <input class="field" id="nickIn" maxlength="24" placeholder="Takma ad (isteğe bağlı)" autocomplete="off" />
+      <button class="primary-btn" type="submit">Sohbete gir</button>
+      <p class="err" id="err"></p>
+    </form>
+  </section>
+
+  <section class="chat" id="chat">
+    <header class="chat-top">
+      <div>
+        <b>Sohbet</b>
+        <small><span class="live" id="live"></span><span id="status">Bağlanıyor…</span></small>
+      </div>
+      <button class="nick-btn" id="nickBtn"></button>
+    </header>
+    <div class="msgs" id="msgs">
+      <div class="note">Bu sohbette mesajlar 24 saat sonra kalıcı olarak silinir. Hesap ya da kayıt yok.</div>
+    </div>
+    <div class="typing" id="typing"></div>
+    <form class="composer" id="composer">
+      <textarea id="text" rows="1" maxlength="1000" placeholder="Mesaj yaz"></textarea>
+      <button class="send-arrow" id="sendBtn" type="submit" disabled aria-label="Gönder">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </form>
+  </section>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    (() => {
+      const $ = (s) => document.querySelector(s);
+      const ss = { get: (k) => { try { return sessionStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { sessionStorage.setItem(k, v); } catch {} } };
+      const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+      let pw = ss.get("sohbetSifre") || "";
+      let nick = ls.get("sohbetNick") || "";
+      let cid = ls.get("sohbetCid");
+      if (!cid) { cid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2)); ls.set("sohbetCid", cid); }
+
+      const seen = new Map(); // id -> element
+      let last = 0, ttl = 864e5, skew = 0, timer = null, failing = 0, started = false;
+
+      const api = (method, path, body) => fetch(path, {
+        method,
+        headers: { "x-sohbet-sifre": pw, ...(body ? { "content-type": "application/json" } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+
+      function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1900); }
+      const fmtTime = (ts) => new Date(ts).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+      function left(ts) {
+        const ms = ts + ttl - (Date.now() + skew);
+        if (ms <= 0) return "siliniyor";
+        if (ms >= 36e5) return `${Math.ceil(ms / 36e5)} sa sonra silinecek`;
+        return `${Math.max(1, Math.ceil(ms / 6e4))} dk sonra silinecek`;
+      }
+      const nearBottom = () => { const m = $("#msgs"); return m.scrollHeight - m.scrollTop - m.clientHeight < 120; };
+      const toBottom = () => { const m = $("#msgs"); m.scrollTop = m.scrollHeight; };
+
+      function addMsg(msg, pending) {
+        if (seen.has(msg.id)) { const el = seen.get(msg.id); el.classList.remove("pending"); return; }
+        const stick = nearBottom() || msg.cid === cid;
+        const box = $("#msgs");
+        const prev = box.lastElementChild;
+        const mine = msg.cid === cid;
+        const row = document.createElement("div");
+        row.className = "row" + (mine ? " me" : "") + (pending ? " pending" : "");
+        row.dataset.ts = msg.ts;
+        row.dataset.cid = msg.cid;
+        const showWho = !mine && !(prev && prev.dataset && prev.dataset.cid === msg.cid);
+        row.innerHTML = `${showWho ? '<div class="who"></div>' : ""}<div class="bubble"></div><div class="meta"></div>`;
+        if (showWho) row.querySelector(".who").textContent = msg.nick || "Anonim";
+        row.querySelector(".bubble").textContent = msg.text;
+        row.querySelector(".meta").textContent = fmtTime(msg.ts) + " · " + left(msg.ts);
+        box.appendChild(row);
+        seen.set(msg.id, row);
+        if (stick) toBottom();
+      }
+
+      function refreshMeta() {
+        const now = Date.now() + skew;
+        for (const [id, row] of seen) {
+          const ts = Number(row.dataset.ts);
+          if (now - ts >= ttl) { row.remove(); seen.delete(id); continue; }
+          row.querySelector(".meta").textContent = fmtTime(ts) + " · " + left(ts);
+        }
+      }
+
+      function setStatus(ok, text) { $("#live").classList.toggle("off", !ok); $("#status").textContent = text; }
+
+      async function poll() {
+        clearTimeout(timer);
+        try {
+          const r = await api("GET", `/api/chat?since=${last}&cid=${encodeURIComponent(cid)}`);
+          if (r.status === 401) return logout("Şifre yanlış.");
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || "Hata");
+          if (!started) { started = true; ss.set("sohbetSifre", pw); showChat(); }
+          skew = d.now - Date.now(); ttl = d.ttl || ttl;
+          d.messages.forEach((m) => { addMsg(m); last = Math.max(last, m.ts); });
+          const t = $("#typing");
+          t.innerHTML = d.typing.length ? `<span class="dots"><i></i><i></i><i></i></span>` : "";
+          if (d.typing.length) t.append(` ${[...new Set(d.typing)].join(", ")} yazıyor…`);
+          failing = 0;
+          setStatus(true, "Canlı · mesajlar 24 saatte silinir");
+        } catch (e) {
+          failing++;
+          if (!started) { $("#err").textContent = e.message === "Failed to fetch" ? "Bağlantı kurulamadı." : e.message; return; }
+          setStatus(false, "Bağlantı bekleniyor…");
+        }
+        const base = document.hidden ? 10000 : 2500;
+        timer = setTimeout(poll, Math.min(base * (1 + failing), 30000));
+      }
+
+      function showChat() {
+        $("#gate").style.display = "none";
+        $("#chat").classList.add("on");
+        $("#nickBtn").textContent = nick || "Anonim";
+        setInterval(refreshMeta, 30000);
+        setTimeout(() => { toBottom(); $("#text").focus(); }, 50);
+      }
+
+      function logout(msg) {
+        clearTimeout(timer);
+        pw = ""; started = false; ss.set("sohbetSifre", "");
+        $("#chat").classList.remove("on");
+        $("#gate").style.display = "";
+        $("#err").textContent = msg || "";
+      }
+
+      $("#login").addEventListener("submit", (e) => {
+        e.preventDefault();
+        $("#err").textContent = "";
+        pw = $("#pw").value;
+        const n = $("#nickIn").value.trim();
+        if (n) { nick = n; ls.set("sohbetNick", nick); }
+        poll();
+      });
+      $("#nickIn").value = nick;
+
+      $("#nickBtn").addEventListener("click", () => {
+        const btn = $("#nickBtn");
+        const input = document.createElement("input");
+        input.className = "field"; input.style.height = "34px"; input.style.width = "140px"; input.maxLength = 24;
+        input.value = nick; input.placeholder = "Takma ad";
+        btn.replaceWith(input); input.focus(); input.select();
+        const done = () => { nick = input.value.trim(); ls.set("sohbetNick", nick); btn.textContent = nick || "Anonim"; input.replaceWith(btn); };
+        input.addEventListener("blur", done);
+        input.addEventListener("keydown", (e) => { if (e.key === "Enter") input.blur(); });
+      });
+
+      const text = $("#text");
+      let lastTyping = 0;
+      text.addEventListener("input", () => {
+        text.style.height = "auto";
+        text.style.height = Math.min(text.scrollHeight, 120) + "px";
+        $("#sendBtn").disabled = !text.value.trim();
+        if (text.value.trim() && Date.now() - lastTyping > 2500) {
+          lastTyping = Date.now();
+          api("POST", "/api/chat", { typing: true, cid, nick }).catch(() => {});
+        }
+      });
+      text.addEventListener("keydown", (e) => {
+        // Bilgisayarda Enter gönderir, Shift+Enter alt satır
+        if (e.key === "Enter" && !e.shiftKey && matchMedia("(hover: hover)").matches) { e.preventDefault(); $("#composer").requestSubmit(); }
+      });
+
+      $("#composer").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const value = text.value.trim();
+        if (!value) return;
+        const tmp = { id: "tmp-" + Date.now(), ts: Date.now() + skew, cid, nick: nick || "Anonim", text: value };
+        addMsg(tmp, true);
+        text.value = ""; text.style.height = "auto"; $("#sendBtn").disabled = true; text.focus();
+        try {
+          const r = await api("POST", "/api/chat", { text: value, cid, nick });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || "Gönderilemedi");
+          const el = seen.get(tmp.id); seen.delete(tmp.id);
+          el.remove();
+          addMsg(d.message);
+          poll();
+        } catch (err) {
+          const el = seen.get(tmp.id);
+          if (el) { el.querySelector(".meta").textContent = "Gönderilemedi"; }
+          toast(err.message || "Gönderilemedi");
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => { if (!document.hidden && started) poll(); });
+      if (pw) poll();
+    })();
+  </script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
 
-// Galeri şifresini kontrol eder (GALERI_SIFRE ortam değişkeni)
-export function checkPassword(request) {
-  const expected = process.env.GALERI_SIFRE || "";
-  const given = request.headers.get("x-galeri-sifre") || "";
-  if (!expected) return { ok: false, status: 500, error: "GALERI_SIFRE tanımlı değil" };
+// Şifre kontrolü. Varsayılan: galeri (GALERI_SIFRE / x-galeri-sifre)
+export function checkPassword(request, envName = "GALERI_SIFRE", header = "x-galeri-sifre") {
+  const expected = process.env[envName] || "";
+  const given = request.headers.get(header) || "";
+  if (!expected) return { ok: false, status: 500, error: `${envName} tanımlı değil` };
   const a = Buffer.from(given);
   const b = Buffer.from(expected);
   const ok = a.length === b.length && timingSafeEqual(a, b);
