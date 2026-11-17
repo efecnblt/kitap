@@ -4,102 +4,155 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="theme-color" content="#f5f3ee" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0f0f0f" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#0d2f5e" />
   <title>Sohbet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=6" />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=7" />
   <style>
+    :root {
+      --navy: #0b2a55; --blue: #1a5aa6; --blue-2: #2a74c4; --cream: #f3ecd6; --cream-2: #e4d9b8;
+      --red: #c62828; --red-2: #8e1414; --wine: #9b1c1c; --text: #2b2418;
+      --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.07' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M35 35m-22 0a22 22 0 1 0 44 0a16 16 0 1 0 -32 0a10 10 0 1 0 20 0a4 4 0 1 0 -8 0'/%3E%3Cpath d='M105 105m-22 0a22 22 0 1 1 44 0a16 16 0 1 1 -32 0a10 10 0 1 1 20 0a4 4 0 1 1 -8 0'/%3E%3Cpath d='M70 0c10 18 30 22 35 35M0 70c18 10 22 30 35 35M140 70c-18-10-22-30-35-35M70 140c-10-18-30-22-35-35'/%3E%3Cpath d='M57 35c8-6 20-4 26 6M83 105c-8 6-20 4-26-6'/%3E%3C/g%3E%3C/svg%3E");
+    }
     html, body { height: 100%; }
-    body { display: flex; flex-direction: column; height: 100dvh; overflow: hidden; }
+    body {
+      display: flex; flex-direction: column; height: 100dvh; overflow: hidden; font-family: "Nunito", system-ui, sans-serif; color: #fff;
+      background: var(--pattern), radial-gradient(120% 90% at 50% 35%, var(--blue-2) 0%, var(--blue) 45%, var(--navy) 100%);
+      background-color: var(--navy);
+    }
+    .cond { font-family: "Oswald", "Arial Narrow", sans-serif; }
 
     /* Giriş */
     .gate { flex: 1; display: grid; place-items: center; padding: 16px; }
-    .gate-box { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; animation: fadeUp .6s var(--ease) both; }
-    .gate h1 { font-family: var(--serif); font-weight: 400; font-size: 46px; margin: 0; letter-spacing: -.02em; line-height: 1; }
-    .gate p { color: var(--muted); margin: 0 0 10px; font-size: 14px; line-height: 1.5; }
-    .field { height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; outline: none; }
-    .field:focus { border-color: var(--ink); }
-    .err { color: var(--ask); font-size: 14px; min-height: 18px; margin: 0; }
+    .gate-box {
+      width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 12px; padding: 22px 20px;
+      background: linear-gradient(180deg, rgba(8,32,66,.75), rgba(8,32,66,.55)); border: 1px solid rgba(255,255,255,.15);
+      border-radius: 18px; box-shadow: 0 20px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
+      animation: fadeUp .6s var(--ease) both;
+    }
+    .gate h1 { font-family: "Oswald", sans-serif; font-weight: 600; font-size: 40px; margin: 0; text-align: center; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+    .gate p { color: rgba(255,255,255,.75); margin: 0 0 4px; font-size: 14px; line-height: 1.5; text-align: center; }
+    .field {
+      height: 50px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18);
+      background: #0a1f3f; color: #fff; font: inherit; font-size: 16px; font-weight: 700; outline: none;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,.5);
+    }
+    .field::placeholder { color: rgba(255,255,255,.55); }
+    .field:focus { border-color: rgba(255,255,255,.5); }
+    .err { color: #ffb4b4; font-size: 14px; min-height: 18px; margin: 0; text-align: center; font-weight: 700; }
+
+    .bevel {
+      height: 50px; border-radius: 12px; font-family: "Oswald", sans-serif; font-weight: 600; font-size: 18px; letter-spacing: .04em; text-transform: uppercase;
+      color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.45);
+      background: linear-gradient(180deg, #9aa3ad 0%, #6c7580 48%, #565f6a 52%, #6b737d 100%);
+      border: 1px solid #3c434b; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 0 #2a3036, 0 6px 12px rgba(0,0,0,.35);
+      transition: transform .1s, box-shadow .1s, opacity .2s;
+    }
+    .bevel:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 1px 0 #2a3036, 0 3px 6px rgba(0,0,0,.3); }
+    .bevel:disabled { opacity: .6; }
+    .bevel.green { background: linear-gradient(180deg, #5fbf5a 0%, #2f9a36 48%, #23852b 52%, #2e9634 100%); border-color: #17591c; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 3px 0 #124517, 0 6px 12px rgba(0,0,0,.35); }
 
     /* Sohbet */
     .chat { flex: 1; display: none; flex-direction: column; min-height: 0; }
     .chat.on { display: flex; }
     .chat-top {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: calc(10px + var(--safe-t)) 16px 10px; border-bottom: 1px solid var(--line);
-      background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: calc(10px + var(--safe-t)) 14px 12px;
     }
-    .chat-top b { font-weight: 600; font-size: 16px; letter-spacing: -.01em; display: block; }
-    .chat-top small { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
-    .live { width: 7px; height: 7px; border-radius: 50%; background: #3aa76d; box-shadow: 0 0 0 0 rgba(58,167,109,.5); animation: pulse 2s infinite; }
-    .live.off { background: var(--muted); animation: none; }
-    @keyframes pulse { 70% { box-shadow: 0 0 0 7px rgba(58,167,109,0); } 100% { box-shadow: 0 0 0 0 rgba(58,167,109,0); } }
-    .nick-btn { font-size: 13px; color: var(--ink-2); border: 1px solid var(--line); background: var(--surface); height: 34px; padding: 0 12px; border-radius: 999px; }
+    .chat-top::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(160,200,255,.6), transparent); }
+    .back {
+      width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; flex: none; text-decoration: none;
+      background: radial-gradient(circle at 40% 30%, #ef5350, var(--red) 55%, var(--red-2));
+      box-shadow: inset 0 2px 2px rgba(255,255,255,.35), inset 0 -3px 4px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.4); color: #fff;
+    }
+    .back:active { transform: scale(.94); }
+    .title { text-align: center; flex: 1; min-width: 0; }
+    .title b { font-family: "Oswald", sans-serif; font-weight: 600; font-size: 26px; display: block; line-height: 1.1; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+    .title small { font-size: 11.5px; color: rgba(255,255,255,.8); display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
+    .live { width: 7px; height: 7px; border-radius: 50%; background: #5ee36a; box-shadow: 0 0 0 0 rgba(94,227,106,.6); animation: pulse 2s infinite; }
+    .live.off { background: #aab; animation: none; }
+    @keyframes pulse { 70% { box-shadow: 0 0 0 7px rgba(94,227,106,0); } 100% { box-shadow: 0 0 0 0 rgba(94,227,106,0); } }
+    .nick-btn {
+      font-family: "Oswald", sans-serif; font-weight: 500; font-size: 14px; color: #fff; height: 36px; padding: 0 12px; border-radius: 10px; max-width: 110px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      background: rgba(8,32,66,.6); border: 1px solid rgba(255,255,255,.2); box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+    }
+    .nick-edit { height: 36px; width: 120px; padding: 0 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,.4); background: #0a1f3f; color: #fff; font: inherit; font-size: 16px; outline: none; }
 
-    .msgs { flex: 1; overflow-y: auto; padding: 16px 14px 8px; display: flex; flex-direction: column; gap: 4px; overscroll-behavior: contain; }
-    .note { align-self: center; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.5; max-width: 300px; margin: 6px 0 14px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); }
-    .row { display: flex; flex-direction: column; align-items: flex-start; max-width: 80%; animation: msgIn .3s var(--ease) both; }
-    .row.me { align-self: flex-end; align-items: flex-end; }
-    @keyframes msgIn { from { opacity: 0; transform: translateY(8px) scale(.98); } }
-    .who { font-size: 11.5px; color: var(--muted); margin: 8px 6px 3px; }
+    .msgs { flex: 1; overflow-y: auto; padding: 14px 10px 8px; display: flex; flex-direction: column; gap: 12px; overscroll-behavior: contain; }
+    .note { align-self: center; text-align: center; color: rgba(255,255,255,.8); font-size: 12px; line-height: 1.5; max-width: 300px; margin: 4px 0 6px; padding: 8px 12px; border-radius: 10px; background: rgba(8,32,66,.5); font-weight: 700; }
+    .row { display: flex; align-items: flex-end; gap: 0; max-width: 92%; animation: msgIn .35s var(--ease) both; }
+    .row.me { align-self: flex-end; flex-direction: row-reverse; }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(10px) scale(.97); } }
+    .ava {
+      width: 52px; height: 52px; border-radius: 50%; flex: none; display: grid; place-items: center; position: relative; z-index: 1;
+      font-family: "Oswald", sans-serif; font-weight: 600; font-size: 22px; color: #fff; text-transform: uppercase;
+      background: radial-gradient(circle at 40% 30%, #3f6fa8, #1b3f6f 70%);
+      border: 3px solid #0e2b57; box-shadow: 0 0 0 3px #6fa2e0, 0 4px 10px rgba(0,0,0,.45);
+    }
+    .row.me .ava { background: radial-gradient(circle at 40% 30%, #c0504d, #7d1d1d 70%); }
     .bubble {
-      padding: 9px 13px; border-radius: 18px; font-size: 15.5px; line-height: 1.4; white-space: pre-wrap; word-break: break-word;
-      background: var(--surface); border: 1px solid var(--line); border-bottom-left-radius: 6px;
+      position: relative; min-width: 120px; padding: 10px 18px 8px 24px; margin-left: -14px;
+      background: linear-gradient(180deg, #faf5e4 0%, var(--cream) 60%, var(--cream-2) 100%); color: var(--text);
+      border-radius: 26px 26px 26px 10px; box-shadow: 0 3px 0 rgba(0,0,0,.18), 0 8px 18px rgba(0,0,0,.28), inset 0 1px 0 #fff;
     }
-    .row.me .bubble { background: var(--ink); color: var(--on-ink); border-color: var(--ink); border-bottom-left-radius: 18px; border-bottom-right-radius: 6px; }
-    .row.pending .bubble { opacity: .55; }
-    .meta { font-size: 10.5px; color: var(--muted); margin: 3px 6px 0; font-variant-numeric: tabular-nums; }
+    .row.me .bubble { margin-left: 0; margin-right: -14px; padding: 10px 24px 8px 18px; border-radius: 26px 26px 10px 26px; }
+    .row.pending .bubble { opacity: .65; }
+    .who { font-family: "Oswald", sans-serif; font-weight: 600; font-size: 16px; color: var(--wine); line-height: 1.15; margin-bottom: 2px; }
+    .txt { font-size: 15.5px; font-weight: 700; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
+    .meta { font-size: 11px; color: #8a7a55; margin-top: 4px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
-    .typing { height: 22px; padding: 0 18px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+    .typing { height: 22px; padding: 0 18px; font-size: 12.5px; color: rgba(255,255,255,.85); display: flex; align-items: center; gap: 6px; font-weight: 700; }
     .dots { display: inline-flex; gap: 3px; }
-    .dots i { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); animation: dot 1.2s infinite; }
+    .dots i { width: 5px; height: 5px; border-radius: 50%; background: #fff; animation: dot 1.2s infinite; }
     .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
     @keyframes dot { 30% { transform: translateY(-3px); opacity: 1; } 0%, 60%, 100% { opacity: .4; } }
 
-    .composer { display: flex; align-items: flex-end; gap: 8px; padding: 8px 12px calc(10px + var(--safe-b)); border-top: 1px solid var(--line); background: var(--bg); }
+    .composer { display: flex; align-items: flex-end; gap: 8px; padding: 8px 10px 4px; }
     .composer textarea {
-      flex: 1; resize: none; max-height: 120px; min-height: 44px; padding: 11px 14px; border-radius: 22px;
-      border: 1px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 16px; line-height: 1.35; outline: none;
+      flex: 1; resize: none; max-height: 120px; min-height: 50px; padding: 13px 16px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18); background: #0a1f3f; color: #fff; font: inherit; font-size: 16px; font-weight: 800; line-height: 1.35; outline: none;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,.5);
     }
-    .composer textarea:focus { border-color: var(--ink); }
-    .send-arrow { width: 44px; height: 44px; border-radius: 50%; background: var(--ink); color: var(--on-ink); display: grid; place-items: center; flex: none; transition: transform .2s var(--ease), opacity .2s; }
-    .send-arrow:disabled { opacity: .35; }
-    .send-arrow:active { transform: scale(.9); }
+    .composer textarea::placeholder { color: rgba(255,255,255,.85); }
+    .composer .bevel { flex: none; padding: 0 16px; }
+    .foot-note { margin: 2px 14px calc(10px + var(--safe-b)); font-size: 11.5px; color: rgba(190,215,250,.85); font-weight: 700; }
   </style>
 </head>
 <body>
   <section class="gate" id="gate">
     <form class="gate-box" id="login">
-      <h1>Sohbet</h1>
+      <h1>Sohbet Masası</h1>
       <p>Şifreyle girilen, anonim bir sohbet. Mesajlar gönderildikten 24 saat sonra kendiliğinden silinir.</p>
       <input class="field" type="password" id="pw" placeholder="Şifre" autocomplete="current-password" required />
       <input class="field" id="nickIn" maxlength="24" placeholder="Takma ad (isteğe bağlı)" autocomplete="off" />
-      <button class="primary-btn" type="submit">Sohbete gir</button>
+      <button class="bevel green" type="submit">Masaya otur</button>
       <p class="err" id="err"></p>
     </form>
   </section>
 
   <section class="chat" id="chat">
     <header class="chat-top">
-      <div>
+      <a class="back" href="/" aria-label="Ana sayfa">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </a>
+      <div class="title">
         <b>Sohbet</b>
         <small><span class="live" id="live"></span><span id="status">Bağlanıyor…</span></small>
       </div>
       <button class="nick-btn" id="nickBtn"></button>
     </header>
     <div class="msgs" id="msgs">
-      <div class="note">Bu sohbette mesajlar 24 saat sonra kalıcı olarak silinir. Hesap ya da kayıt yok.</div>
+      <div class="note">Masaya hoş geldin. Hesap ya da kayıt yok.</div>
     </div>
     <div class="typing" id="typing"></div>
     <form class="composer" id="composer">
-      <textarea id="text" rows="1" maxlength="1000" placeholder="Mesaj yaz"></textarea>
-      <button class="send-arrow" id="sendBtn" type="submit" disabled aria-label="Gönder">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-      </button>
+      <textarea id="text" rows="1" maxlength="1000" placeholder="Dokun ve bir şeyler yaz…"></textarea>
+      <button class="bevel" id="sendBtn" type="submit" disabled>Gönder</button>
     </form>
+    <p class="foot-note">Mesajlar 24 saatte silinir. Bu sohbetin dışında kimse mesajları okuyamaz.</p>
   </section>
 
   <div class="toast" id="toast"></div>
@@ -129,7 +182,7 @@
       function left(ts) {
         const ms = ts + ttl - (Date.now() + skew);
         if (ms <= 0) return "siliniyor";
-        if (ms >= 36e5) return `${Math.ceil(ms / 36e5)} sa sonra silinecek`;
+        if (ms >= 36e5) return `${Math.min(24, Math.ceil(ms / 36e5))} sa sonra silinecek`;
         return `${Math.max(1, Math.ceil(ms / 6e4))} dk sonra silinecek`;
       }
       const nearBottom = () => { const m = $("#msgs"); return m.scrollHeight - m.scrollTop - m.clientHeight < 120; };
@@ -139,16 +192,16 @@
         if (seen.has(msg.id)) { const el = seen.get(msg.id); el.classList.remove("pending"); return; }
         const stick = nearBottom() || msg.cid === cid;
         const box = $("#msgs");
-        const prev = box.lastElementChild;
         const mine = msg.cid === cid;
         const row = document.createElement("div");
         row.className = "row" + (mine ? " me" : "") + (pending ? " pending" : "");
         row.dataset.ts = msg.ts;
         row.dataset.cid = msg.cid;
-        const showWho = !mine && !(prev && prev.dataset && prev.dataset.cid === msg.cid);
-        row.innerHTML = `${showWho ? '<div class="who"></div>' : ""}<div class="bubble"></div><div class="meta"></div>`;
-        if (showWho) row.querySelector(".who").textContent = msg.nick || "Anonim";
-        row.querySelector(".bubble").textContent = msg.text;
+        const name = msg.nick || "Anonim";
+        row.innerHTML = `<div class="ava"></div><div class="bubble"><div class="who"></div><div class="txt"></div><div class="meta"></div></div>`;
+        row.querySelector(".ava").textContent = [...name.trim()][0] || "?";
+        row.querySelector(".who").textContent = name;
+        row.querySelector(".txt").textContent = msg.text;
         row.querySelector(".meta").textContent = fmtTime(msg.ts) + " · " + left(msg.ts);
         box.appendChild(row);
         seen.set(msg.id, row);
@@ -219,7 +272,7 @@
       $("#nickBtn").addEventListener("click", () => {
         const btn = $("#nickBtn");
         const input = document.createElement("input");
-        input.className = "field"; input.style.height = "34px"; input.style.width = "140px"; input.maxLength = 24;
+        input.className = "nick-edit"; input.maxLength = 24;
         input.value = nick; input.placeholder = "Takma ad";
         btn.replaceWith(input); input.focus(); input.select();
         const done = () => { nick = input.value.trim(); ls.set("sohbetNick", nick); btn.textContent = nick || "Anonim"; input.replaceWith(btn); };
