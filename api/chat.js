@@ -1,42 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { checkPassword, json } from "./_auth.js";
+import { list, del } from "@vercel/blob";
+import { checkPassword, json, blobOpts } from "./_auth.js";
+import { TTL_MS, KEY, TYPING, pipeline, clean, saveMessage, cleanupMedia } from "./_redis.js";
 
 // Mesajlar Upstash Redis'te tek bir sıralı kümede (score = gönderilme zamanı) tutulur.
 // Her okuma/yazmada 24 saatten eski mesajlar silinir; sohbet 24 saat boş kalırsa anahtar da kendiliğinden düşer.
-const TTL_MS = 24 * 60 * 60 * 1000;
-const KEY = "sohbet:mesajlar";
-const TYPING = "sohbet:yaziyor";
-
-function redisConfig() {
-  const env = process.env;
-  const find = (suffixes) => {
-    for (const s of suffixes) if (env[s]) return env[s];
-    const k = Object.keys(env).find((n) => suffixes.some((s) => n.endsWith("_" + s)));
-    return k ? env[k] : "";
-  };
-  return {
-    url: find(["UPSTASH_REDIS_REST_URL", "KV_REST_API_URL"]),
-    token: find(["UPSTASH_REDIS_REST_TOKEN", "KV_REST_API_TOKEN"]),
-  };
-}
-
-async function pipeline(cmds) {
-  const { url, token } = redisConfig();
-  if (!url || !token) throw new Error("Redis bağlı değil");
-  const r = await fetch(url.replace(/\/$/, "") + "/pipeline", {
-    method: "POST",
-    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
-    body: JSON.stringify(cmds),
-  });
-  if (!r.ok) throw new Error("Redis hatası " + r.status);
-  const out = await r.json();
-  return out.map((x) => {
-    if (x.error) throw new Error(x.error);
-    return x.result;
-  });
-}
-
-const clean = (s, n) => String(s || "").replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, "").trim().slice(0, n);
 
 export async function GET(request) {
   const auth = checkPassword(request, "SOHBET_SIFRE", "x-sohbet-sifre");
@@ -59,6 +27,8 @@ export async function GET(request) {
       const [ts, nick] = String(val).split("|");
       if (id !== cid && now - Number(ts) < 5000) who.push(nick || "Biri");
     }
+    // Eski ses dosyalarını arka planda temizle (saatte bir)
+    if (!since) await cleanupMedia({ list, del, opts: blobOpts() });
     return json({ now, ttl: TTL_MS, messages, typing: who });
   } catch (e) {
     console.error(e);
@@ -88,12 +58,7 @@ export async function POST(request) {
     const text = clean(body.text, 1000);
     if (!text) return json({ error: "Boş mesaj" }, 400);
     const msg = { id: randomUUID(), ts: now, cid, nick, text };
-    await pipeline([
-      ["ZADD", KEY, String(now), JSON.stringify(msg)],
-      ["ZREMRANGEBYSCORE", KEY, "-inf", String(now - TTL_MS)],
-      ["PEXPIRE", KEY, String(TTL_MS)],
-      ["HDEL", TYPING, cid],
-    ]);
+    await saveMessage(msg);
     return json({ ok: true, message: msg });
   } catch (e) {
     console.error(e);

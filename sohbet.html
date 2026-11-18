@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=7" />
+  <link rel="stylesheet" href="style.css?v=8" />
   <style>
     :root {
       --navy: #0b2a55; --blue: #1a5aa6; --blue-2: #2a74c4; --cream: #f3ecd6; --cream-2: #e4d9b8;
@@ -118,6 +118,51 @@
     }
     .composer textarea::placeholder { color: rgba(255,255,255,.85); }
     .composer .bevel { flex: none; padding: 0 16px; }
+    /* Ek, mikrofon, kayıt */
+    .round {
+      width: 50px; height: 50px; border-radius: 12px; flex: none; display: grid; place-items: center; color: #fff; cursor: pointer;
+      background: linear-gradient(180deg, #2f6fb8 0%, #1d4f8c 50%, #17447a 52%, #1f5596 100%);
+      border: 1px solid #0d2c55; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 3px 0 #0a2142, 0 6px 12px rgba(0,0,0,.3);
+    }
+    .round:active { transform: translateY(2px); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 #0a2142; }
+    .round.red { background: linear-gradient(180deg, #e0504c 0%, #b42323 50%, #a01c1c 52%, #b82a2a 100%); border-color: #5e0e0e; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 3px 0 #4a0b0b, 0 6px 12px rgba(0,0,0,.3); }
+    .composer.recording > :not(.recbar) { display: none; }
+    .recbar { display: none; flex: 1; align-items: center; gap: 8px; }
+    .composer.recording .recbar { display: flex; }
+    .rec-info {
+      flex: 1; height: 50px; border-radius: 12px; background: #0a1f3f; border: 1px solid rgba(255,255,255,.18); box-shadow: inset 0 2px 6px rgba(0,0,0,.5);
+      display: flex; align-items: center; gap: 10px; padding: 0 14px; font-weight: 800; font-variant-numeric: tabular-nums;
+    }
+    .rec-dot { width: 12px; height: 12px; border-radius: 50%; background: #ff3b30; animation: recPulse 1s infinite; }
+    @keyframes recPulse { 50% { opacity: .3; transform: scale(.8); } }
+    .rec-wave { flex: 1; display: flex; align-items: center; gap: 3px; height: 24px; overflow: hidden; }
+    .rec-wave i { width: 3px; border-radius: 2px; background: rgba(255,255,255,.75); height: 20%; transition: height .1s; flex: none; }
+
+    /* Medya mesajları */
+    .bubble .media { margin-top: 6px; }
+    .ph-img { display: block; max-width: min(240px, 62vw); max-height: 320px; border-radius: 14px; cursor: zoom-in; box-shadow: 0 2px 6px rgba(0,0,0,.2); background: var(--cream-2); }
+    .ph-loading { width: 200px; height: 150px; border-radius: 14px; background: var(--cream-2); display: grid; place-items: center; color: #8a7a55; font-weight: 800; font-size: 13px; }
+    .vid-card {
+      position: relative; width: min(240px, 62vw); aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; cursor: pointer;
+      background: linear-gradient(160deg, #1d4f8c, #0b2a55); display: grid; place-items: center; color: #fff;
+    }
+    .vid-card .play { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; color: #0b2a55; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+    .vid-card .vinfo { position: absolute; left: 10px; bottom: 8px; font-size: 12px; font-weight: 800; }
+    .media video { display: block; width: min(260px, 66vw); max-height: 360px; border-radius: 14px; background: #000; }
+    .aud { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+    .aud button { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center; color: #fff;
+      background: radial-gradient(circle at 40% 30%, #3f6fa8, #1b3f6f 70%); box-shadow: 0 2px 5px rgba(0,0,0,.3); }
+    .row.me .aud button { background: radial-gradient(circle at 40% 30%, #ef5350, #9b1c1c 70%); }
+    .aud .bar { flex: 1; height: 6px; border-radius: 3px; background: rgba(60,45,20,.18); overflow: hidden; }
+    .aud .bar i { display: block; height: 100%; width: 0; background: var(--wine); border-radius: 3px; }
+    .aud .t { font-size: 12px; font-weight: 800; color: #6d5f3f; font-variant-numeric: tabular-nums; min-width: 34px; text-align: right; }
+    .prog { font-size: 12px; font-weight: 800; color: #8a7a55; margin-top: 4px; }
+
+    .viewer { position: fixed; inset: 0; z-index: 80; background: rgba(4,14,30,.94); display: none; align-items: center; justify-content: center; padding: 16px; }
+    .viewer.open { display: flex; }
+    .viewer img { max-width: 100%; max-height: 86vh; border-radius: 10px; }
+    .viewer .close { position: absolute; top: calc(14px + var(--safe-t)); right: 14px; }
+
     .foot-note { margin: 2px 14px calc(10px + var(--safe-b)); font-size: 11.5px; color: rgba(190,215,250,.85); font-weight: 700; }
   </style>
 </head>
@@ -149,11 +194,32 @@
     </div>
     <div class="typing" id="typing"></div>
     <form class="composer" id="composer">
+      <label class="round" aria-label="Fotoğraf ya da video gönder">
+        <input type="file" id="fileIn" accept="image/*,video/*" hidden />
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>
+      </label>
       <textarea id="text" rows="1" maxlength="1000" placeholder="Dokun ve bir şeyler yaz…"></textarea>
-      <button class="bevel" id="sendBtn" type="submit" disabled>Gönder</button>
+      <button class="round" type="button" id="micBtn" aria-label="Sesli mesaj kaydet">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+      <button class="bevel" id="sendBtn" type="submit" disabled hidden>Gönder</button>
+      <div class="recbar">
+        <button class="round red" type="button" id="recCancel" aria-label="Kaydı iptal et">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+        <div class="rec-info"><span class="rec-dot"></span><span id="recTime">0:00</span><span class="rec-wave" id="recWave"></span></div>
+        <button class="bevel green" type="button" id="recSend" style="padding:0 16px">Gönder</button>
+      </div>
     </form>
     <p class="foot-note">Mesajlar 24 saatte silinir. Bu sohbetin dışında kimse mesajları okuyamaz.</p>
   </section>
+
+  <div class="viewer" id="viewer">
+    <button class="round red close" type="button" id="viewerClose" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <img id="viewerImg" alt="" />
+  </div>
 
   <div class="toast" id="toast"></div>
 
@@ -201,12 +267,228 @@
         row.innerHTML = `<div class="ava"></div><div class="bubble"><div class="who"></div><div class="txt"></div><div class="meta"></div></div>`;
         row.querySelector(".ava").textContent = [...name.trim()][0] || "?";
         row.querySelector(".who").textContent = name;
-        row.querySelector(".txt").textContent = msg.text;
+        if (msg.media) {
+          row.querySelector(".txt").remove();
+          const m = document.createElement("div");
+          m.className = "media";
+          row.querySelector(".who").after(m);
+          renderMedia(m, msg.media, msg._local);
+        } else {
+          row.querySelector(".txt").textContent = msg.text;
+        }
         row.querySelector(".meta").textContent = fmtTime(msg.ts) + " · " + left(msg.ts);
         box.appendChild(row);
         seen.set(msg.id, row);
         if (stick) toBottom();
       }
+
+      // ---------- Medya ----------
+      const CHUNK = 3.5 * 1024 * 1024;
+      const mediaCache = new Map(); // media.id -> object URL
+      const fmtDur = (s) => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+      const fmtMB = (b) => b < 1048576 ? Math.max(1, Math.round(b / 1024)) + " KB" : (b / 1048576).toFixed(b > 10485760 ? 0 : 1) + " MB";
+
+      async function loadMedia(media, onProgress) {
+        if (mediaCache.has(media.id)) return mediaCache.get(media.id);
+        const chunks = [];
+        for (let n = 0; n < media.parts; n++) {
+          const r = await fetch(`/api/media?id=${encodeURIComponent(media.id)}&n=${n}`, { headers: { "x-sohbet-sifre": pw } });
+          if (!r.ok) throw new Error(r.status === 410 ? "Süresi doldu" : "Açılamadı");
+          chunks.push(await r.blob());
+          if (onProgress) onProgress((n + 1) / media.parts);
+        }
+        const url = URL.createObjectURL(new Blob(chunks, { type: media.type }));
+        mediaCache.set(media.id, url);
+        return url;
+      }
+
+      function renderMedia(box, media, localUrl) {
+        if (localUrl) mediaCache.set(media.id, localUrl);
+        if (media.kind === "image") {
+          box.innerHTML = `<div class="ph-loading">Fotoğraf yükleniyor…</div>`;
+          loadMedia(media).then((url) => {
+            const stick = nearBottom();
+            const img = new Image();
+            img.className = "ph-img"; img.alt = "Fotoğraf"; img.src = url;
+            img.onload = () => { if (stick) toBottom(); };
+            img.onclick = () => { $("#viewerImg").src = url; $("#viewer").classList.add("open"); };
+            box.replaceChildren(img);
+          }).catch((e) => { box.innerHTML = `<div class="ph-loading"></div>`; box.firstChild.textContent = e.message; });
+        } else if (media.kind === "video") {
+          box.innerHTML = `<div class="vid-card"><span class="play"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span><span class="vinfo"></span></div>`;
+          const info = box.querySelector(".vinfo");
+          info.textContent = "Video" + (media.dur ? " · " + fmtDur(media.dur) : "") + (media.size ? " · " + fmtMB(media.size) : "");
+          box.querySelector(".vid-card").onclick = async () => {
+            try {
+              const url = await loadMedia(media, (f) => { info.textContent = "Yükleniyor %" + Math.round(f * 100); });
+              const v = document.createElement("video");
+              v.src = url; v.controls = true; v.playsInline = true; v.autoplay = true;
+              box.replaceChildren(v);
+            } catch (e) { info.textContent = e.message; }
+          };
+        } else if (media.kind === "audio") {
+          box.innerHTML = `<div class="aud"><button type="button" aria-label="Oynat"></button><span class="bar"><i></i></span><span class="t"></span></div>`;
+          const btn = box.querySelector("button"), bar = box.querySelector(".bar i"), t = box.querySelector(".t");
+          const PLAY = `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>`;
+          const PAUSE = `<svg viewBox="0 0 24 24" width="20" height="20"><path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/></svg>`;
+          btn.innerHTML = PLAY; t.textContent = fmtDur(media.dur);
+          let audio = null;
+          btn.onclick = async () => {
+            try {
+              if (!audio) {
+                t.textContent = "…";
+                audio = new Audio(await loadMedia(media));
+                audio.ontimeupdate = () => {
+                  const d = isFinite(audio.duration) ? audio.duration : media.dur;
+                  bar.style.width = (d ? Math.min(100, audio.currentTime / d * 100) : 0) + "%";
+                  t.textContent = fmtDur(d - audio.currentTime);
+                };
+                audio.onended = () => { btn.innerHTML = PLAY; bar.style.width = "0%"; t.textContent = fmtDur(media.dur); };
+              }
+              if (audio.paused) {
+                document.querySelectorAll("audio").forEach(() => {});
+                if (window._playing && window._playing !== audio) window._playing.pause();
+                window._playing = audio;
+                audio.onpause = () => { btn.innerHTML = PLAY; };
+                await audio.play(); btn.innerHTML = PAUSE;
+              } else { audio.pause(); }
+            } catch (e) { t.textContent = "Hata"; toast(e.message || "Ses açılamadı"); }
+          };
+        }
+      }
+
+      async function sendMedia(kind, blob, extra = {}) {
+        const type = (blob.type || "").split(";")[0] || (kind === "audio" ? "audio/webm" : "application/octet-stream");
+        const id = Math.round(Date.now() + skew) + "-" + Math.random().toString(36).slice(2, 10).padEnd(8, "0");
+        const parts = Math.max(1, Math.ceil(blob.size / CHUNK));
+        if (parts > 20) { toast("Dosya çok büyük (en fazla 70 MB)"); return; }
+        const localUrl = URL.createObjectURL(blob);
+        const media = { id, kind, type, parts, size: blob.size, ...extra };
+        const tmp = { id: "tmp-" + id, ts: Date.now() + skew, cid, nick: nick || "Anonim", media, _local: localUrl };
+        addMsg(tmp, true);
+        const row = seen.get(tmp.id);
+        const prog = document.createElement("div");
+        prog.className = "prog"; prog.textContent = "Gönderiliyor…";
+        row.querySelector(".bubble").appendChild(prog);
+        try {
+          for (let n = 0; n < parts; n++) {
+            const r = await fetch(`/api/media?step=part&id=${id}&n=${n}`, {
+              method: "POST", headers: { "x-sohbet-sifre": pw, "content-type": "application/octet-stream" },
+              body: blob.slice(n * CHUNK, (n + 1) * CHUNK),
+            });
+            if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || "Gönderilemedi");
+            prog.textContent = parts > 1 ? `Gönderiliyor %${Math.round((n + 1) / parts * 100)}` : "Gönderiliyor…";
+          }
+          const r = await api("POST", `/api/media?step=done&id=${id}`, { ...media, cid, nick });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.error || "Gönderilemedi");
+          d.message._local = localUrl;
+          seen.delete(tmp.id); row.remove();
+          addMsg(d.message);
+          poll();
+        } catch (e) {
+          prog.textContent = "Gönderilemedi: " + (e.message || "hata");
+          toast(e.message || "Gönderilemedi");
+        }
+      }
+
+      async function shrinkImage(f) {
+        if (f.type === "image/gif") return { blob: f, w: 0, h: 0 };
+        const url = URL.createObjectURL(f);
+        try {
+          const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+          const scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+          const c = document.createElement("canvas");
+          c.width = Math.round(img.naturalWidth * scale); c.height = Math.round(img.naturalHeight * scale);
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          const blob = await new Promise((res) => c.toBlob(res, "image/jpeg", 0.85));
+          return { blob, w: c.width, h: c.height };
+        } finally { URL.revokeObjectURL(url); }
+      }
+
+      function videoDuration(f) {
+        return new Promise((res) => {
+          const v = document.createElement("video");
+          const url = URL.createObjectURL(f);
+          v.preload = "metadata"; v.muted = true;
+          v.onloadedmetadata = () => { res(isFinite(v.duration) ? v.duration : 0); URL.revokeObjectURL(url); };
+          v.onerror = () => { res(0); URL.revokeObjectURL(url); };
+          setTimeout(() => res(0), 4000);
+          v.src = url;
+        });
+      }
+
+      $("#fileIn").addEventListener("change", async (e) => {
+        const f = e.target.files && e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        try {
+          if (f.type.startsWith("image/")) {
+            const { blob, w, h } = await shrinkImage(f);
+            await sendMedia("image", blob, { w, h });
+          } else if (f.type.startsWith("video/")) {
+            if (f.size > 70 * 1024 * 1024) return toast("Video çok büyük (en fazla 70 MB)");
+            const dur = await videoDuration(f);
+            await sendMedia("video", f, { dur });
+          } else toast("Sadece fotoğraf ya da video gönderilebilir");
+        } catch { toast("Bu dosya açılamadı"); }
+      });
+
+      $("#viewerClose").onclick = () => $("#viewer").classList.remove("open");
+      $("#viewer").onclick = (e) => { if (e.target.id === "viewer") $("#viewer").classList.remove("open"); };
+
+      // ---------- Sesli mesaj ----------
+      let rec = null, recChunks = [], recStart = 0, recTimer = null, recStream = null, recCancelled = false, analyser = null, audioCtx = null;
+      const pickMime = () => ["audio/webm;codecs=opus", "audio/mp4", "audio/webm", "audio/ogg;codecs=opus"].find((m) => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || "";
+      const wave = $("#recWave");
+
+      async function startRec() {
+        if (!navigator.mediaDevices || !window.MediaRecorder) return toast("Bu tarayıcı ses kaydını desteklemiyor");
+        try { recStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+        catch { return toast("Mikrofon izni verilmedi"); }
+        const mime = pickMime();
+        rec = new MediaRecorder(recStream, mime ? { mimeType: mime, audioBitsPerSecond: 48000 } : undefined);
+        recChunks = []; recCancelled = false;
+        rec.ondataavailable = (e) => { if (e.data && e.data.size) recChunks.push(e.data); };
+        rec.onstop = () => {
+          recStream.getTracks().forEach((t) => t.stop());
+          if (audioCtx) { audioCtx.close().catch(() => {}); audioCtx = null; }
+          const dur = (Date.now() - recStart) / 1000;
+          $("#composer").classList.remove("recording");
+          clearInterval(recTimer);
+          if (recCancelled || dur < 0.7 || !recChunks.length) return;
+          const blob = new Blob(recChunks, { type: (rec.mimeType || mime || "audio/webm").split(";")[0] });
+          sendMedia("audio", blob, { dur });
+        };
+        rec.start(250);
+        recStart = Date.now();
+        $("#composer").classList.add("recording");
+        wave.innerHTML = "";
+        try {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+          audioCtx.createMediaStreamSource(recStream).connect(analyser);
+        } catch { analyser = null; }
+        const data = new Uint8Array(128);
+        recTimer = setInterval(() => {
+          const s = (Date.now() - recStart) / 1000;
+          $("#recTime").textContent = fmtDur(s);
+          let lvl = 0.3 + Math.random() * 0.3;
+          if (analyser) { analyser.getByteTimeDomainData(data); let mx = 0; for (const v of data) mx = Math.max(mx, Math.abs(v - 128)); lvl = Math.min(1, mx / 50 + 0.1); }
+          const bar = document.createElement("i"); bar.style.height = Math.round(lvl * 100) + "%";
+          wave.appendChild(bar);
+          while (wave.children.length > 60) wave.firstChild.remove();
+          if (s >= 120) stopRec(false);
+        }, 120);
+      }
+      function stopRec(cancel) {
+        if (!rec || rec.state === "inactive") return;
+        recCancelled = cancel;
+        rec.stop();
+      }
+      $("#micBtn").addEventListener("click", startRec);
+      $("#recCancel").addEventListener("click", () => stopRec(true));
+      $("#recSend").addEventListener("click", () => stopRec(false));
 
       function refreshMeta() {
         const now = Date.now() + skew;
@@ -285,7 +567,10 @@
       text.addEventListener("input", () => {
         text.style.height = "auto";
         text.style.height = Math.min(text.scrollHeight, 120) + "px";
-        $("#sendBtn").disabled = !text.value.trim();
+        const has = !!text.value.trim();
+        $("#sendBtn").disabled = !has;
+        $("#sendBtn").hidden = !has;
+        $("#micBtn").hidden = has;
         if (text.value.trim() && Date.now() - lastTyping > 2500) {
           lastTyping = Date.now();
           api("POST", "/api/chat", { typing: true, cid, nick }).catch(() => {});
@@ -302,7 +587,7 @@
         if (!value) return;
         const tmp = { id: "tmp-" + Date.now(), ts: Date.now() + skew, cid, nick: nick || "Anonim", text: value };
         addMsg(tmp, true);
-        text.value = ""; text.style.height = "auto"; $("#sendBtn").disabled = true; text.focus();
+        text.value = ""; text.style.height = "auto"; $("#sendBtn").disabled = true; $("#sendBtn").hidden = true; $("#micBtn").hidden = false; text.focus();
         try {
           const r = await api("POST", "/api/chat", { text: value, cid, nick });
           const d = await r.json();
